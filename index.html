@@ -36,7 +36,12 @@
         }
     </script>
     <style>
-        body {
+        html, body {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow-x: hidden;
             background-color: #0B0F17;
             color: #F3F4F6;
             font-family: 'Inter', sans-serif;
@@ -454,11 +459,39 @@
         </div>
     </div>
 
+    <!-- MODAL 4: VISTA PREVIA DE WHATSAPP -->
+    <div id="modalWhatsApp" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-6 rounded-2xl border border-gray-700 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-white text-lg flex items-center gap-2">
+                    <i data-lucide="message-square" class="w-5 h-5 text-emerald-400"></i>
+                    Vista Previa de WhatsApp
+                </h3>
+                <button onclick="closeModal('modalWhatsApp')" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Mensaje listo para enviar:</label>
+                <textarea id="whatsappTextArea" rows="5" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-emerald-500 resize-none"></textarea>
+            </div>
+            <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                <p class="text-xs text-emerald-300">
+                    Al hacer clic en enviar, se abrirá WhatsApp Web / App con este número y texto cargado automáticamente.
+                </p>
+            </div>
+            <div class="pt-2 flex gap-3">
+                <button type="button" onclick="closeModal('modalWhatsApp')" class="w-1/2 py-2.5 bg-gray-800 text-gray-300 rounded-xl text-sm font-medium">Cancelar</button>
+                <button type="button" id="btnConfirmarWhatsApp" onclick="lanzarWhatsAppFinal()" class="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2">
+                    <i data-lucide="send" class="w-4 h-4"></i> Abrir WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- JAVASCRIPT LÓGICO COMPLETO -->
     <script>
         // ESTADO DE DATOS (Persistencia con LocalStorage)
         let planes = JSON.parse(localStorage.getItem('gym_planes')) || [
-            { id: 1, nombre: 'Mensual Indivudual', precio: 80, dias: 30 },
+            { id: 1, nombre: 'Mensual Individual', precio: 80, dias: 30 },
             { id: 2, nombre: 'Trimestral Promo', precio: 210, dias: 90 },
             { id: 3, nombre: 'Pase Anual VIP', precio: 750, dias: 365 }
         ];
@@ -470,10 +503,11 @@
         ];
 
         let fiados = JSON.parse(localStorage.getItem('gym_fiados')) || [
-            { id: 1, socioNombre: 'Juan Pérez', detalle: 'Agua + Proteína', monto: 10.50, fecha: 'Today' }
+            { id: 1, socioNombre: 'Juan Pérez', detalle: 'Agua + Proteína', monto: 10.50, fecha: 'Hoy' }
         ];
 
         let carrito = [];
+        let whatsappUrlTemporal = '';
 
         // AL CARGAR PÁGINA
         document.addEventListener('DOMContentLoaded', () => {
@@ -537,7 +571,7 @@
                             </span>
                         </td>
                         <td class="py-3 text-right">
-                            <button onclick="enviarWhatsApp('${s.nombre}', ${dias}, '${s.telefono}', '${s.fechaVencimiento}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 ml-auto">
+                            <button onclick="prepararWhatsApp('${s.nombre}', ${dias}, '${s.telefono}', '${s.fechaVencimiento}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 ml-auto">
                                 <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
                                 WhatsApp
                             </button>
@@ -557,14 +591,23 @@
             lucide.createIcons();
         }
 
-        // ENVÍO DE WHATSAPP CON FORMATO SOLICITADO
-        function enviarWhatsApp(nombre, dias, telefono, fechaVencimiento) {
+        // PREPARAR POP-UP VISTA PREVIA WHATSAPP
+        function prepararWhatsApp(nombre, dias, telefono, fechaVencimiento) {
             let textoDias = dias < 0 ? `tu membresía venció el ${fechaVencimiento}` : `faltan ${dias} días para que finalice tu membresía (${fechaVencimiento})`;
             const mensaje = `Hola ${nombre}, te saludamos de Gimnasio Barrio Fit. Te recordamos que ${textoDias}. Renueva acercándote a caja o cancela por Yape al siguiente número 991 248 321. ¡Te esperamos para seguir entrenando!`;
             
             const numLimpio = telefono.replace(/\D/g, '');
-            const url = `https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`;
-            window.open(url, '_blank');
+            whatsappUrlTemporal = `https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`;
+            
+            document.getElementById('whatsappTextArea').value = mensaje;
+            openModal('modalWhatsApp');
+        }
+
+        function lanzarWhatsAppFinal() {
+            if (whatsappUrlTemporal) {
+                window.open(whatsappUrlTemporal, '_blank');
+                closeModal('modalWhatsApp');
+            }
         }
 
         // TABLA DE SOCIOS
@@ -602,7 +645,7 @@
                         <button onclick="renovarSocio(${s.id})" title="Renovar Membresía" class="p-2 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 rounded-lg text-xs font-medium">
                             <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="enviarWhatsApp('${s.nombre}', ${dias}, '${s.telefono}', '${s.fechaVencimiento}')" title="Mandar WhatsApp" class="p-2 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 rounded-lg text-xs font-medium">
+                        <button onclick="prepararWhatsApp('${s.nombre}', ${dias}, '${s.telefono}', '${s.fechaVencimiento}')" title="Mandar WhatsApp" class="p-2 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 rounded-lg text-xs font-medium">
                             <i data-lucide="message-square" class="w-4 h-4"></i>
                         </button>
                     </td>
