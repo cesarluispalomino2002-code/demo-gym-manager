@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymControl SaaS - Sistema de Gestión para Gimnasios</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: {
+                            900: '#0B0F17',
+                            800: '#111827',
+                            700: '#1F2937',
+                            600: '#374151'
+                        },
+                        brand: {
+                            500: '#6366F1',
+                            600: '#4F46E5',
+                            accent: '#10B981'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0B0F17;
+            color: #F3F4F6;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(31, 41, 55, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .pulse-yellow {
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0% { border-color: rgba(245, 158, 11, 0.4); }
+            50% { border-color: rgba(245, 158, 11, 1); }
+            100% { border-color: rgba(245, 158, 11, 0.4); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row antialiased">
+
+    <!-- SIDEBAR -->
+    <aside class="w-full md:w-64 glass-panel flex flex-col justify-between p-4 border-r border-gray-800 z-10">
+        <div>
+            <!-- Logo -->
+            <div class="flex items-center gap-3 px-2 py-3 mb-6">
+                <div class="bg-gradient-to-tr from-indigo-600 to-emerald-400 p-2.5 rounded-xl text-white shadow-lg shadow-indigo-500/20">
+                    <i data-lucide="dumbbell" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-white tracking-wide">GymControl</h1>
+                    <span class="text-xs text-emerald-400 font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">Modo Admin</span>
+                </div>
+            </div>
+
+            <!-- Navegación Principal -->
+            <nav class="space-y-1.5">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    Dashboard
+                </button>
+                <button onclick="switchTab('socios')" id="nav-socios" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/60 transition-all">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    Gestión de Socios
+                </button>
+                <button onclick="switchTab('planes')" id="nav-planes" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/60 transition-all">
+                    <i data-lucide="layers" class="w-4 h-4"></i>
+                    Gestión de Planes
+                </button>
+                <button onclick="switchTab('fiados')" id="nav-fiados" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/60 transition-all">
+                    <i data-lucide="notebook-pen" class="w-4 h-4"></i>
+                    Cuaderno de Fiados
+                </button>
+                <button onclick="switchTab('pos')" id="nav-pos" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/60 transition-all">
+                    <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                    Caja / Ventas
+                </button>
+            </nav>
+        </div>
+
+        <div class="pt-4 border-t border-gray-800/60 mt-6">
+            <div class="p-3 glass-card rounded-xl flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-sm">
+                    G
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-semibold text-white truncate">Gimnasio Barrio Fit</p>
+                    <p class="text-[10px] text-gray-400">Yape: 991 248 321</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto max-h-screen">
+
+        <!-- HEADER TOP -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+                <h2 id="page-title" class="text-2xl font-bold text-white tracking-tight">Dashboard General</h2>
+                <p class="text-sm text-gray-400">Control de clientes, cobros e ingresos del gimnasio.</p>
+            </div>
+            <button onclick="openModal('modalSocio')" class="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-indigo-600/30">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                Registrar Nuevo Socio
+            </button>
+        </header>
+
+        <!-- VISTA 1: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-panel p-5 rounded-2xl">
+                    <div class="flex justify-between items-center text-gray-400 mb-2">
+                        <span class="text-xs font-medium uppercase tracking-wider">Socios Activos</span>
+                        <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg"><i data-lucide="user-check" class="w-4 h-4"></i></div>
+                    </div>
+                    <p id="kpi-activos" class="text-2xl font-bold text-white">0</p>
+                    <p class="text-xs text-emerald-400 mt-1 flex items-center gap-1">Con acceso al día</p>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl">
+                    <div class="flex justify-between items-center text-gray-400 mb-2">
+                        <span class="text-xs font-medium uppercase tracking-wider">Por Vencer (1-7 días)</span>
+                        <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg"><i data-lucide="clock" class="w-4 h-4"></i></div>
+                    </div>
+                    <p id="kpi-por-vencer" class="text-2xl font-bold text-amber-400">0</p>
+                    <p class="text-xs text-amber-400/80 mt-1">Enviar recordatorio Yape</p>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl">
+                    <div class="flex justify-between items-center text-gray-400 mb-2">
+                        <span class="text-xs font-medium uppercase tracking-wider">Membresías Vencidas</span>
+                        <div class="p-2 bg-rose-500/10 text-rose-400 rounded-lg"><i data-lucide="user-x" class="w-4 h-4"></i></div>
+                    </div>
+                    <p id="kpi-vencidos" class="text-2xl font-bold text-rose-400">0</p>
+                    <p class="text-xs text-rose-400/80 mt-1">Pendientes de renovación</p>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl">
+                    <div class="flex justify-between items-center text-gray-400 mb-2">
+                        <span class="text-xs font-medium uppercase tracking-wider">Fiados Pendientes</span>
+                        <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg"><i data-lucide="receipt" class="w-4 h-4"></i></div>
+                    </div>
+                    <p id="kpi-fiados" class="text-2xl font-bold text-white">S/ 0.00</p>
+                    <p class="text-xs text-gray-400 mt-1">Por cobrar en mostrador</p>
+                </div>
+            </div>
+
+            <!-- Accesos rápidos / Vencimientos próximos -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-white flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-5 h-5 text-amber-400"></i>
+                        Socios por Vencer o Vencidos
+                    </h3>
+                    <button onclick="switchTab('socios')" class="text-xs text-indigo-400 hover:text-indigo-300">Ver todos &rarr;</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="text-xs text-gray-400 uppercase border-b border-gray-800">
+                            <tr>
+                                <th class="pb-3 font-medium">Socio</th>
+                                <th class="pb-3 font-medium">Plan</th>
+                                <th class="pb-3 font-medium">Vencimiento</th>
+                                <th class="pb-3 font-medium">Días Restantes</th>
+                                <th class="pb-3 font-medium text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-proximos-vencimientos" class="divide-y divide-gray-800/60">
+                            <!-- Inyectado con JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 2: GESTIÓN DE SOCIOS -->
+        <section id="tab-socios" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row justify-between gap-4">
+                <div class="relative flex-1">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-gray-400"></i>
+                    <input type="text" id="inputSearchSocios" onkeyup="filtrarSocios()" placeholder="Buscar por nombre, DNI o teléfono..." class="w-full bg-gray-900/80 border border-gray-700/80 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="flex gap-2">
+                    <select id="filterEstado" onchange="filtrarSocios()" class="bg-gray-900/80 border border-gray-700/80 text-sm text-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500">
+                        <option value="todos">Todos los Estados</option>
+                        <option value="activo">Activos</option>
+                        <option value="por_vencer">Por Vencer (&le; 7 días)</option>
+                        <option value="vencido">Vencidos</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- TABLA DE SOCIOS -->
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-800/50 text-xs text-gray-400 uppercase border-b border-gray-800">
+                            <tr>
+                                <th class="p-4 font-medium">Socio</th>
+                                <th class="p-4 font-medium">Plan</th>
+                                <th class="p-4 font-medium">Fecha Vencimiento</th>
+                                <th class="p-4 font-medium">Días Faltantes</th>
+                                <th class="p-4 font-medium">Estado</th>
+                                <th class="p-4 font-medium text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-socios-body" class="divide-y divide-gray-800">
+                            <!-- Inyectado con JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 3: GESTIÓN DE PLANES -->
+        <section id="tab-planes" class="tab-content hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-bold text-white">Planes y Membresías Configuradas</h3>
+                    <p class="text-xs text-gray-400">Crea o edita las opciones de cobro para tus clientes.</p>
+                </div>
+                <button onclick="openModal('modalPlan')" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium text-sm transition-all">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Crear Nuevo Plan
+                </button>
+            </div>
+
+            <div id="grid-planes" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Inyectado con JS -->
+            </div>
+        </section>
+
+        <!-- VISTA 4: CUADERNO DE FIADOS -->
+        <section id="tab-fiados" class="tab-content hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h3 class="font-bold text-white text-lg flex items-center gap-2">
+                            <i data-lucide="notebook-pen" class="w-5 h-5 text-indigo-400"></i>
+                            Registro de Consumos / Deudas
+                        </h3>
+                        <p class="text-xs text-gray-400">Anota aguas, energizantes o suplementos que se pagarán después.</p>
+                    </div>
+                    <button onclick="openModal('modalFiado')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium flex items-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Anotar Deuda
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="text-xs text-gray-400 uppercase border-b border-gray-800">
+                            <tr>
+                                <th class="pb-3 font-medium">Socio</th>
+                                <th class="pb-3 font-medium">Producto / Detalle</th>
+                                <th class="pb-3 font-medium">Monto</th>
+                                <th class="pb-3 font-medium">Fecha</th>
+                                <th class="pb-3 font-medium text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-fiados-body" class="divide-y divide-gray-800">
+                            <!-- Inyectado con JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 5: CAJA / POS -->
+        <section id="tab-pos" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-4">
+                    <h3 class="font-bold text-white text-lg">Productos y Servicios Rápidos</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <div onclick="agregarAlCarrito('Agua Mineral 600ml', 2.50)" class="glass-panel p-4 rounded-xl cursor-pointer hover:border-indigo-500 transition-all text-center">
+                            <div class="p-3 bg-blue-500/10 text-blue-400 rounded-lg w-fit mx-auto mb-2"><i data-lucide="droplet" class="w-6 h-6"></i></div>
+                            <p class="font-semibold text-white text-sm">Agua Mineral</p>
+                            <p class="text-xs text-emerald-400 font-bold mt-1">S/ 2.50</p>
+                        </div>
+                        <div onclick="agregarAlCarrito('Energizante Sporade', 4.00)" class="glass-panel p-4 rounded-xl cursor-pointer hover:border-indigo-500 transition-all text-center">
+                            <div class="p-3 bg-amber-500/10 text-amber-400 rounded-lg w-fit mx-auto mb-2"><i data-lucide="zap" class="w-6 h-6"></i></div>
+                            <p class="font-semibold text-white text-sm">Sporade / Gatorade</p>
+                            <p class="text-xs text-emerald-400 font-bold mt-1">S/ 4.00</p>
+                        </div>
+                        <div onclick="agregarAlCarrito('Batido de Proteína', 8.00)" class="glass-panel p-4 rounded-xl cursor-pointer hover:border-indigo-500 transition-all text-center">
+                            <div class="p-3 bg-purple-500/10 text-purple-400 rounded-lg w-fit mx-auto mb-2"><i data-lucide="cup-soda" class="w-6 h-6"></i></div>
+                            <p class="font-semibold text-white text-sm">Batido Proteico</p>
+                            <p class="text-xs text-emerald-400 font-bold mt-1">S/ 8.00</p>
+                        </div>
+                        <div onclick="agregarAlCarrito('Pase Diario (Un día)', 10.00)" class="glass-panel p-4 rounded-xl cursor-pointer hover:border-indigo-500 transition-all text-center">
+                            <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-lg w-fit mx-auto mb-2"><i data-lucide="ticket" class="w-6 h-6"></i></div>
+                            <p class="font-semibold text-white text-sm">Pase Diario</p>
+                            <p class="text-xs text-emerald-400 font-bold mt-1">S/ 10.00</p>
+                        </div>
+                        <div onclick="agregarAlCarrito('Toalla Gym', 15.00)" class="glass-panel p-4 rounded-xl cursor-pointer hover:border-indigo-500 transition-all text-center">
+                            <div class="p-3 bg-rose-500/10 text-rose-400 rounded-lg w-fit mx-auto mb-2"><i data-lucide="shirt" class="w-6 h-6"></i></div>
+                            <p class="font-semibold text-white text-sm">Toalla Gym</p>
+                            <p class="text-xs text-emerald-400 font-bold mt-1">S/ 15.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carrito -->
+                <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <h4 class="font-bold text-white pb-3 border-b border-gray-800 flex justify-between items-center">
+                            <span>Cobro Actual</span>
+                            <i data-lucide="shopping-cart" class="w-4 h-4 text-indigo-400"></i>
+                        </h4>
+                        <div id="carrito-items" class="py-4 space-y-3 min-h-[180px]">
+                            <p class="text-xs text-gray-500 text-center py-8">No hay productos seleccionados</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-800 pt-4 space-y-3">
+                        <div class="flex justify-between font-bold text-lg text-white">
+                            <span>Total a Cobrar</span>
+                            <span id="carrito-total" class="text-emerald-400">S/ 0.00</span>
+                        </div>
+                        <button onclick="completarVenta()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-600/20">
+                            Cobrar por Yape / Efectivo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODALES -->
+
+    <!-- MODAL 1: REGISTRAR SOCIO -->
+    <div id="modalSocio" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-6 rounded-2xl border border-gray-700 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-white text-lg">Registrar o Renovar Socio</h3>
+                <button onclick="closeModal('modalSocio')" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="formSocio" onsubmit="guardarSocio(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Nombre Completo</label>
+                    <input type="text" id="socioNombre" required placeholder="Ej. Carlos Mendoza" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">DNI / Documento</label>
+                        <input type="text" id="socioDni" required placeholder="72839102" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Teléfono (WhatsApp)</label>
+                        <input type="text" id="socioTel" required placeholder="987654321" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Seleccionar Plan</label>
+                    <select id="socioPlan" onchange="actualizarFechaPreview()" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <!-- Cargado dinámicamente -->
+                    </select>
+                </div>
+                <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
+                    <p class="text-xs text-indigo-300">
+                        Vencimiento calculado: <span id="previewVencimiento" class="font-bold text-white">--</span>
+                    </p>
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="closeModal('modalSocio')" class="w-1/2 py-2.5 bg-gray-800 text-gray-300 rounded-xl text-sm font-medium">Cancelar</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/30">Guardar Socio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CREAR/EDITAR PLAN -->
+    <div id="modalPlan" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-6 rounded-2xl border border-gray-700 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalPlanTitle" class="font-bold text-white text-lg">Crear Nuevo Plan</h3>
+                <button onclick="closeModal('modalPlan')" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="formPlan" onsubmit="guardarPlan(event)" class="space-y-4">
+                <input type="hidden" id="planIndex" value="-1">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Nombre del Plan</label>
+                    <input type="text" id="planNombre" required placeholder="Ej. Plan Semestral" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Precio (S/)</label>
+                        <input type="number" step="0.01" id="planPrecio" required placeholder="120.00" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Duración (Días)</label>
+                        <input type="number" id="planDias" required placeholder="30" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="closeModal('modalPlan')" class="w-1/2 py-2.5 bg-gray-800 text-gray-300 rounded-xl text-sm font-medium">Cancelar</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold">Guardar Plan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: ANOTAR FIADO -->
+    <div id="modalFiado" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-6 rounded-2xl border border-gray-700 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-white text-lg">Anotar Deuda / Consumo</h3>
+                <button onclick="closeModal('modalFiado')" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="guardarFiado(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Socio</label>
+                    <select id="fiadoSocio" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <!-- Cargado dinámicamente -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Producto / Detalle</label>
+                    <input type="text" id="fiadoDetalle" required placeholder="Ej. 1 Energizante + 1 Batido" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Monto (S/)</label>
+                    <input type="number" step="0.50" id="fiadoMonto" required placeholder="12.00" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="closeModal('modalFiado')" class="w-1/2 py-2.5 bg-gray-800 text-gray-300 rounded-xl text-sm font-medium">Cancelar</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold">Anotar Deuda</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LÓGICO COMPLETO -->
+    <script>
+        // ESTADO DE DATOS (Persistencia con LocalStorage)
+        let planes = JSON.parse(localStorage.getItem('gym_planes')) || [
+            { id: 1, nombre: 'Mensual Indivudual', precio: 80, dias: 30 },
+            { id: 2, nombre: 'Trimestral Promo', precio: 210, dias: 90 },
+            { id: 3, nombre: 'Pase Anual VIP', precio: 750, dias: 365 }
+        ];
+
+        let socios = JSON.parse(localStorage.getItem('gym_socios')) || [
+            { id: 1, nombre: 'Juan Pérez', dni: '71829384', telefono: '51987654321', planId: 1, fechaVencimiento: getFechaMasDias(5) },
+            { id: 2, nombre: 'María García', dni: '45892103', telefono: '51912345678', planId: 2, fechaVencimiento: getFechaMasDias(25) },
+            { id: 3, nombre: 'Roberto Gómez', dni: '10293847', telefono: '51999888777', planId: 1, fechaVencimiento: getFechaMasDias(-3) }
+        ];
+
+        let fiados = JSON.parse(localStorage.getItem('gym_fiados')) || [
+            { id: 1, socioNombre: 'Juan Pérez', detalle: 'Agua + Proteína', monto: 10.50, fecha: 'Today' }
+        ];
+
+        let carrito = [];
+
+        // AL CARGAR PÁGINA
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderAll();
+        });
+
+        function guardarStorage() {
+            localStorage.setItem('gym_planes', JSON.stringify(planes));
+            localStorage.setItem('gym_socios', JSON.stringify(socios));
+            localStorage.setItem('gym_fiados', JSON.stringify(fiados));
+        }
+
+        function renderAll() {
+            renderDashboard();
+            renderSociosTable();
+            renderPlanesGrid();
+            renderFiadosTable();
+            populateSelects();
+        }
+
+        // CÁLCULO DE DÍAS Y FECHAS
+        function getFechaMasDias(dias) {
+            const date = new Date();
+            date.setDate(date.getDate() + dias);
+            return date.toISOString().split('T')[0];
+        }
+
+        function calcularDiasRestantes(fechaVencimientoStr) {
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            const venc = new Date(fechaVencimientoStr + 'T00:00:00');
+            const diffTime = venc - hoy;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        // DASHBOARD KPI & PROXIMOS VENCIMIENTOS
+        function renderDashboard() {
+            let activos = 0, porVencer = 0, vencidos = 0;
+            const tablaProximos = document.getElementById('lista-proximos-vencimientos');
+            tablaProximos.innerHTML = '';
+
+            socios.forEach(s => {
+                const dias = calcularDiasRestantes(s.fechaVencimiento);
+                const plan = planes.find(p => p.id === s.planId) || { nombre: 'Plan Personal' };
+
+                if (dias > 7) activos++;
+                else if (dias >= 0 && dias <= 7) porVencer++;
+                else vencidos++;
+
+                if (dias <= 7) {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-800/30';
+                    tr.innerHTML = `
+                        <td class="py-3 font-semibold text-white">${s.nombre}</td>
+                        <td class="py-3 text-gray-400 text-xs">${plan.nombre}</td>
+                        <td class="py-3 text-gray-300 text-xs">${s.fechaVencimiento}</td>
+                        <td class="py-3">
+                            <span class="px-2 py-1 rounded-full text-xs font-bold ${dias < 0 ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'}">
+                                ${dias < 0 ? `Vencido hace ${Math.abs(dias)}d` : `Faltan ${dias} días`}
+                            </span>
+                        </td>
+                        <td class="py-3 text-right">
+                            <button onclick="enviarWhatsApp('${s.nombre}', ${dias}, '${s.telefono}', '${s.fechaVencimiento}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 ml-auto">
+                                <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                                WhatsApp
+                            </button>
+                        </td>
+                    `;
+                    tablaProximos.appendChild(tr);
+                }
+            });
+
+            document.getElementById('kpi-activos').innerText = activos;
+            document.getElementById('kpi-por-vencer').innerText = porVencer;
+            document.getElementById('kpi-vencidos').innerText = vencidos;
+
+            const totalFiados = fiados.reduce((acc, curr) => acc + curr.monto, 0);
+            document.getElementById('kpi-fiados').innerText = `S/ ${totalFiados.toFixed(2)}`;
+
+            lucide.createIcons();
+        }
+
+        // ENVÍO DE WHATSAPP CON FORMATO SOLICITADO
+        function enviarWhatsApp(nombre, dias, telefono, fechaVencimiento) {
+            let textoDias = dias < 0 ? `tu membresía venció el ${fechaVencimiento}` : `faltan ${dias} días para que finalice tu membresía (${fechaVencimiento})`;
+            const mensaje = `Hola ${nombre}, te saludamos de Gimnasio Barrio Fit. Te recordamos que ${textoDias}. Renueva acercándote a caja o cancela por Yape al siguiente número 991 248 321. ¡Te esperamos para seguir entrenando!`;
+            
+            const numLimpio = telefono.replace(/\D/g, '');
+            const url = `https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+
+        // TABLA DE SOCIOS
+        function renderSociosTable(lista = socios) {
+            const tbody = document.getElementById('tabla-socios-body');
+            tbody.innerHTML = '';
+
+            lista.forEach(s => {
+                const dias = calcularDiasRestantes(s.fechaVencimiento);
+                const plan = planes.find(p => p.id === s.planId) || { nombre: 'General' };
+
+                let badge = '';
+                if (dias > 7) {
+                    badge = `<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-medium">Activo</span>`;
+                } else if (dias >= 0 && dias <= 7) {
+                    badge = `<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-xs font-medium pulse-yellow">Por Vencer</span>`;
+                } else {
+                    badge = `<span class="px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full text-xs font-medium">Vencido</span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-800/40 transition-all';
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <div class="font-bold text-white">${s.nombre}</div>
+                        <div class="text-xs text-gray-400">DNI: ${s.dni} | Tel: ${s.telefono}</div>
+                    </td>
+                    <td class="p-4 text-xs text-gray-300">${plan.nombre}</td>
+                    <td class="p-4 text-xs font-medium text-gray-300">${s.fechaVencimiento}</td>
+                    <td class="p-4 font-bold ${dias <= 7 ? 'text-amber-400' : 'text-emerald-400'}">
+                        ${dias < 0 ? `<span class="text-rose-400">${dias} días</span>` : `${dias} días`}
+                    </td>
+                    <td class="p-4">${badge}</td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="renovarSocio(${s.id})" title="Renovar Membresía" class="p-2 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 rounded-lg text-xs font-medium">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="enviarWhatsApp('${s.nombre}', ${dias}, '${s.telefono}', '${s.fechaVencimiento}')" title="Mandar WhatsApp" class="p-2 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 rounded-lg text-xs font-medium">
+                            <i data-lucide="message-square" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function filtrarSocios() {
+            const query = document.getElementById('inputSearchSocios').value.toLowerCase();
+            const estado = document.getElementById('filterEstado').value;
+
+            const resultado = socios.filter(s => {
+                const dias = calcularDiasRestantes(s.fechaVencimiento);
+                const matchQuery = s.nombre.toLowerCase().includes(query) || s.dni.includes(query) || s.telefono.includes(query);
+                
+                let matchEstado = true;
+                if (estado === 'activo') matchEstado = dias > 7;
+                if (estado === 'por_vencer') matchEstado = (dias >= 0 && dias <= 7);
+                if (estado === 'vencido') matchEstado = dias < 0;
+
+                return matchQuery && matchEstado;
+            });
+
+            renderSociosTable(resultado);
+        }
+
+        // RENOVAR O CREAR SOCIO
+        function guardarSocio(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('socioNombre').value;
+            const dni = document.getElementById('socioDni').value;
+            const telefono = document.getElementById('socioTel').value;
+            const planId = parseInt(document.getElementById('socioPlan').value);
+
+            const plan = planes.find(p => p.id === planId);
+            const fechaVencimiento = getFechaMasDias(plan ? plan.dias : 30);
+
+            socios.push({
+                id: Date.now(),
+                nombre,
+                dni,
+                telefono,
+                planId,
+                fechaVencimiento
+            });
+
+            guardarStorage();
+            renderAll();
+            closeModal('modalSocio');
+            document.getElementById('formSocio').reset();
+        }
+
+        function renovarSocio(id) {
+            const socio = socios.find(s => s.id === id);
+            if (!socio) return;
+            const plan = planes.find(p => p.id === socio.planId) || planes[0];
+
+            socio.fechaVencimiento = getFechaMasDias(plan.dias);
+            guardarStorage();
+            renderAll();
+            alert(`¡Membresía de ${socio.nombre} renovada por ${plan.dias} días más!`);
+        }
+
+        // PLANES
+        function renderPlanesGrid() {
+            const container = document.getElementById('grid-planes');
+            container.innerHTML = '';
+
+            planes.forEach((p, index) => {
+                const card = document.createElement('div');
+                card.className = 'glass-panel p-5 rounded-2xl relative flex flex-col justify-between border-t-4 border-t-indigo-500';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-white text-lg">${p.nombre}</h4>
+                            <span class="text-xs bg-indigo-500/20 text-indigo-300 font-bold px-2 py-0.5 rounded-md">${p.dias} Días</span>
+                        </div>
+                        <p class="text-3xl font-extrabold text-white my-3">S/ ${p.precio.toFixed(2)}</p>
+                    </div>
+                    <div class="pt-4 border-t border-gray-800 flex justify-end gap-2">
+                        <button onclick="editarPlan(${index})" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-medium">Editar</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function guardarPlan(e) {
+            e.preventDefault();
+            const index = parseInt(document.getElementById('planIndex').value);
+            const nombre = document.getElementById('planNombre').value;
+            const precio = parseFloat(document.getElementById('planPrecio').value);
+            const dias = parseInt(document.getElementById('planDias').value);
+
+            if (index >= 0) {
+                planes[index] = { ...planes[index], nombre, precio, dias };
+            } else {
+                planes.push({ id: Date.now(), nombre, precio, dias });
+            }
+
+            guardarStorage();
+            renderAll();
+            closeModal('modalPlan');
+            document.getElementById('formPlan').reset();
+        }
+
+        function editarPlan(index) {
+            const p = planes[index];
+            document.getElementById('planIndex').value = index;
+            document.getElementById('planNombre').value = p.nombre;
+            document.getElementById('planPrecio').value = p.precio;
+            document.getElementById('planDias').value = p.dias;
+            document.getElementById('modalPlanTitle').innerText = 'Editar Plan';
+            openModal('modalPlan');
+        }
+
+        // FIADOS
+        function renderFiadosTable() {
+            const tbody = document.getElementById('tabla-fiados-body');
+            tbody.innerHTML = '';
+
+            fiados.forEach((f, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-800/30';
+                tr.innerHTML = `
+                    <td class="py-3 font-semibold text-white">${f.socioNombre}</td>
+                    <td class="py-3 text-xs text-gray-300">${f.detalle}</td>
+                    <td class="py-3 text-sm font-bold text-amber-400">S/ ${f.monto.toFixed(2)}</td>
+                    <td class="py-3 text-xs text-gray-400">${f.fecha}</td>
+                    <td class="py-3 text-right">
+                        <button onclick="saldarFiado(${idx})" class="px-3 py-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-lg text-xs font-bold">
+                            Marcar Pagado
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function guardarFiado(e) {
+            e.preventDefault();
+            const socioNombre = document.getElementById('fiadoSocio').value;
+            const detalle = document.getElementById('fiadoDetalle').value;
+            const monto = parseFloat(document.getElementById('fiadoMonto').value);
+
+            fiados.push({
+                id: Date.now(),
+                socioNombre,
+                detalle,
+                monto,
+                fecha: new Date().toLocaleDateString()
+            });
+
+            guardarStorage();
+            renderAll();
+            closeModal('modalFiado');
+        }
+
+        function saldarFiado(index) {
+            fiados.splice(index, 1);
+            guardarStorage();
+            renderAll();
+        }
+
+        // POS
+        function agregarAlCarrito(nombre, precio) {
+            carrito.push({ nombre, precio });
+            renderCarrito();
+        }
+
+        function renderCarrito() {
+            const container = document.getElementById('carrito-items');
+            container.innerHTML = '';
+            let total = 0;
+
+            if (carrito.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 text-center py-8">No hay productos seleccionados</p>`;
+            } else {
+                carrito.forEach((item, idx) => {
+                    total += item.precio;
+                    const div = document.createElement('div');
+                    div.className = 'flex justify-between items-center text-xs text-gray-200';
+                    div.innerHTML = `
+                        <span>${item.nombre}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-white">S/ ${item.precio.toFixed(2)}</span>
+                            <button onclick="eliminarDelCarrito(${idx})" class="text-rose-400 hover:text-rose-300">&times;</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            document.getElementById('carrito-total').innerText = `S/ ${total.toFixed(2)}`;
+        }
+
+        function eliminarDelCarrito(idx) {
+            carrito.splice(idx, 1);
+            renderCarrito();
+        }
+
+        function completarVenta() {
+            if (carrito.length === 0) return alert('El carrito está vacío.');
+            alert('¡Cobro registrado exitosamente!');
+            carrito = [];
+            renderCarrito();
+        }
+
+        // AUXILIARES SELECTS & MODALES
+        function populateSelects() {
+            const selectPlan = document.getElementById('socioPlan');
+            selectPlan.innerHTML = '';
+            planes.forEach(p => {
+                selectPlan.innerHTML += `<option value="${p.id}">${p.nombre} - S/ ${p.precio} (${p.dias} días)</option>`;
+            });
+
+            const selectFiado = document.getElementById('fiadoSocio');
+            selectFiado.innerHTML = '';
+            socios.forEach(s => {
+                selectFiado.innerHTML += `<option value="${s.nombre}">${s.nombre} (${s.dni})</option>`;
+            });
+
+            actualizarFechaPreview();
+        }
+
+        function actualizarFechaPreview() {
+            const planId = parseInt(document.getElementById('socioPlan').value);
+            const plan = planes.find(p => p.id === planId);
+            if (plan) {
+                document.getElementById('previewVencimiento').innerText = getFechaMasDias(plan.dias);
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('bg-indigo-600/20', 'text-indigo-400', 'border', 'border-indigo-500/30');
+                el.classList.add('text-gray-400');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            activeNav.classList.add('bg-indigo-600/20', 'text-indigo-400', 'border', 'border-indigo-500/30');
+            activeNav.classList.remove('text-gray-400');
+
+            const titles = {
+                dashboard: 'Dashboard General',
+                socios: 'Gestión de Socios',
+                planes: 'Gestión de Planes',
+                fiados: 'Cuaderno de Fiados',
+                pos: 'Caja / Ventas'
+            };
+            document.getElementById('page-title').innerText = titles[tabId];
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    </script>
+</body>
+</html>
