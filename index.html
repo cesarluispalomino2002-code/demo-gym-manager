@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GymControl SaaS - Gestión Mobile Ready</title>
+    <title>GymControl SaaS - Gestión de Gimnasio de Barrio</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -72,7 +72,7 @@
                     <i data-lucide="notebook-pen" class="w-4 h-4"></i> Cuaderno de Fiados
                 </button>
                 <button onclick="switchTab('pos')" id="nav-pos" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800/60 transition-all">
-                    <i data-lucide="shopping-bag" class="w-4 h-4"></i> Caja / Ventas
+                    <i data-lucide="shopping-bag" class="w-4 h-4"></i> Caja / Ventas POS
                 </button>
             </nav>
         </div>
@@ -324,37 +324,23 @@
             </div>
         </section>
 
-        <!-- VISTA 6: CAJA / POS -->
+        <!-- VISTA 6: CAJA / POS (CON GESTIÓN CRUD DE PRODUCTOS) -->
         <section id="tab-pos" class="tab-content hidden space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Catálogo de productos POS -->
                 <div class="lg:col-span-2 space-y-4">
-                    <h3 class="font-bold text-white text-lg">Productos y Servicios Rápidos</h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <div onclick="agregarAlCarrito('Agua Mineral 600ml', 2.50)" class="glass-panel p-4 rounded-xl cursor-pointer hover:border-indigo-500 transition-all text-center active:scale-95">
-                            <div class="p-3 bg-blue-500/10 text-blue-400 rounded-lg w-fit mx-auto mb-2"><i data-lucide="droplet" class="w-6 h-6"></i></div>
-                            <p class="font-semibold text-white text-sm">Agua Mineral</p>
-                            <p class="text-xs text-emerald-400 font-bold mt-1">S/ 2.50</p>
-                        </div>
-                        <div onclick="agregarAlCarrito('Energizante Sporade', 4.00)" class="glass-panel p-4 rounded-xl cursor-pointer hover:border-indigo-500 transition-all text-center active:scale-95">
-                            <div class="p-3 bg-amber-500/10 text-amber-400 rounded-lg w-fit mx-auto mb-2"><i data-lucide="zap" class="w-6 h-6"></i></div>
-                            <p class="font-semibold text-white text-sm">Energizante</p>
-                            <p class="text-xs text-emerald-400 font-bold mt-1">S/ 4.00</p>
-                        </div>
-                        <div onclick="agregarAlCarrito('Batido Proteico', 8.00)" class="glass-panel p-4 rounded-xl cursor-pointer hover:border-indigo-500 transition-all text-center active:scale-95">
-                            <div class="p-3 bg-purple-500/10 text-purple-400 rounded-lg w-fit mx-auto mb-2"><i data-lucide="cup-soda" class="w-6 h-6"></i></div>
-                            <p class="font-semibold text-white text-sm">Batido Proteico</p>
-                            <p class="text-xs text-emerald-400 font-bold mt-1">S/ 8.00</p>
-                        </div>
-                        <div onclick="agregarAlCarrito('Pase Diario (Un día)', 10.00)" class="glass-panel p-4 rounded-xl cursor-pointer hover:border-indigo-500 transition-all text-center active:scale-95">
-                            <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-lg w-fit mx-auto mb-2"><i data-lucide="ticket" class="w-6 h-6"></i></div>
-                            <p class="font-semibold text-white text-sm">Pase Diario</p>
-                            <p class="text-xs text-emerald-400 font-bold mt-1">S/ 10.00</p>
-                        </div>
-                        <div onclick="agregarAlCarrito('Toalla Gym', 15.00)" class="glass-panel p-4 rounded-xl cursor-pointer hover:border-indigo-500 transition-all text-center active:scale-95">
-                            <div class="p-3 bg-rose-500/10 text-rose-400 rounded-lg w-fit mx-auto mb-2"><i data-lucide="shirt" class="w-6 h-6"></i></div>
-                            <p class="font-semibold text-white text-sm">Toalla Gym</p>
-                            <p class="text-xs text-emerald-400 font-bold mt-1">S/ 15.00</p>
-                        </div>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <h3 class="font-bold text-white text-lg flex items-center gap-2">
+                            <i data-lucide="store" class="w-5 h-5 text-indigo-400"></i> Catálogo de Productos POS
+                        </h3>
+                        <button onclick="prepararNuevoProducto()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Añadir Producto
+                        </button>
+                    </div>
+
+                    <!-- Grid Dinámica de Productos -->
+                    <div id="grid-pos-productos" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <!-- Se llena con JavaScript -->
                     </div>
                 </div>
 
@@ -592,7 +578,7 @@
         </div>
     </div>
 
-    <!-- MODAL 8: POPUP YAFE / WHATSAPP -->
+    <!-- MODAL 8: POPUP WHATSAPP -->
     <div id="modalWhatsApp" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="glass-panel w-full max-w-md p-6 rounded-2xl border border-gray-700 shadow-2xl space-y-4">
             <div class="flex justify-between items-center">
@@ -617,6 +603,44 @@
         </div>
     </div>
 
+    <!-- MODAL 9: CREAR / EDITAR PRODUCTO DEL POS -->
+    <div id="modalPosProducto" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-6 rounded-2xl border border-gray-700 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 id="modalPosTitle" class="font-bold text-white text-lg">Añadir Producto POS</h3>
+                <button onclick="closeModal('modalPosProducto')" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="formPosProducto" onsubmit="guardarPosProducto(event)" class="space-y-4">
+                <input type="hidden" id="posProductoId">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Nombre del Producto</label>
+                    <input type="text" id="posProductoNombre" required placeholder="Ej. Creatina Monohidratada" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Precio (S/)</label>
+                        <input type="number" step="0.50" id="posProductoPrecio" required placeholder="5.00" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Ícono Visual</label>
+                        <select id="posProductoIcono" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                            <option value="droplet">Gota / Agua</option>
+                            <option value="zap">Rayo / Energizante</option>
+                            <option value="cup-soda">Vaso / Batido</option>
+                            <option value="ticket">Pase / Entrada</option>
+                            <option value="shirt">Toalla / Ropa</option>
+                            <option value="package">Paquete / Suplemento</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="closeModal('modalPosProducto')" class="w-1/2 py-2.5 bg-gray-800 text-gray-300 rounded-xl text-sm font-medium">Cancelar</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/30">Guardar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- JAVASCRIPT CON LÓGICA COMPLETA -->
     <script>
         // ESTADO Y PERSISTENCIA (LocalStorage)
@@ -630,6 +654,14 @@
             { id: 1, nombre: 'Juan Pérez', dni: '71829384', telefono: '51987654321', planId: 1, fechaVencimiento: getFechaMasDias(5), historial: [] },
             { id: 2, nombre: 'María García', dni: '45892103', telefono: '51912345678', planId: 2, fechaVencimiento: getFechaMasDias(25), historial: [] },
             { id: 3, nombre: 'Roberto Gómez', dni: '10293847', telefono: '51999888777', planId: 1, fechaVencimiento: getFechaMasDias(-3), historial: [] }
+        ];
+
+        let productosPos = JSON.parse(localStorage.getItem('gym_productos_pos')) || [
+            { id: 1, nombre: 'Agua Mineral 600ml', precio: 2.50, icono: 'droplet', color: 'blue' },
+            { id: 2, nombre: 'Energizante Sporade', precio: 4.00, icono: 'zap', color: 'amber' },
+            { id: 3, nombre: 'Batido Proteico', precio: 8.00, icono: 'cup-soda', color: 'purple' },
+            { id: 4, nombre: 'Pase Diario (Un día)', precio: 10.00, icono: 'ticket', color: 'emerald' },
+            { id: 5, nombre: 'Toalla Gym', precio: 15.00, icono: 'shirt', color: 'rose' }
         ];
 
         let fiados = JSON.parse(localStorage.getItem('gym_fiados')) || [
@@ -655,6 +687,7 @@
         function guardarStorage() {
             localStorage.setItem('gym_planes', JSON.stringify(planes));
             localStorage.setItem('gym_socios', JSON.stringify(socios));
+            localStorage.setItem('gym_productos_pos', JSON.stringify(productosPos));
             localStorage.setItem('gym_fiados', JSON.stringify(fiados));
             localStorage.setItem('gym_gastos', JSON.stringify(gastos));
             localStorage.setItem('gym_categorias_gastos', JSON.stringify(categoriasGastos));
@@ -666,6 +699,7 @@
             renderPlanesGrid();
             renderGastosTable();
             renderFiadosTable();
+            renderPosProductosGrid();
             populateSelects();
         }
 
@@ -817,7 +851,7 @@
             document.getElementById('formSocio').reset();
         }
 
-        // LÓGICA DE RENOVACIÓN DE PLAN
+        // RENOVACIÓN DE PLAN
         function abrirModalRenovar(socioId) {
             const socio = socios.find(s => s.id === socioId);
             if (!socio) return;
@@ -879,7 +913,7 @@
             renderAll();
             closeModal('modalRenovar');
 
-            // Notificación al cliente por WhatsApp
+            // Mensaje de confirmación por WhatsApp
             const mensaje = `¡Hola ${socio.nombre}! Confirmo tu renovación en Gimnasio Barrio Fit. Tu plan ${plan.nombre} (${cantidad} periodo/s) está activo hasta el ${nuevaFechaVencimiento}. ¡Gracias por entrenar con nosotros!`;
             const numLimpio = socio.telefono.replace(/\D/g, '');
             whatsappUrlTemporal = `https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`;
@@ -966,7 +1000,7 @@
             openModal('modalPlan');
         }
 
-        // REGISTRO DE GASTOS
+        // GASTOS
         function renderGastosTable() {
             const tbody = document.getElementById('tabla-gastos-body');
             const filtroTiempo = document.getElementById('filtroTiempoGasto').value;
@@ -1102,7 +1136,91 @@
             renderAll();
         }
 
-        // POS
+        // LÓGICA DE PRODUCTOS POS (CRUD COMPLETO Y CARRITO)
+        function renderPosProductosGrid() {
+            const grid = document.getElementById('grid-pos-productos');
+            grid.innerHTML = '';
+
+            productosPos.forEach(prod => {
+                const card = document.createElement('div');
+                card.className = 'glass-panel p-3.5 rounded-xl flex flex-col justify-between relative group hover:border-indigo-500 transition-all';
+                card.innerHTML = `
+                    <div class="absolute top-2 right-2 flex gap-1 opacity-80 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="editarPosProducto(${prod.id})" class="p-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-md text-xs" title="Editar">
+                            <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <button onclick="eliminarPosProducto(${prod.id})" class="p-1 bg-rose-900/60 hover:bg-rose-700 text-rose-300 rounded-md text-xs" title="Eliminar">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                    <div onclick="agregarAlCarrito('${prod.nombre}', ${prod.precio})" class="cursor-pointer text-center pt-2">
+                        <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-lg w-fit mx-auto mb-2">
+                            <i data-lucide="${prod.icono || 'package'}" class="w-6 h-6"></i>
+                        </div>
+                        <p class="font-semibold text-white text-xs sm:text-sm line-clamp-1">${prod.nombre}</p>
+                        <p class="text-xs text-emerald-400 font-bold mt-1">S/ ${parseFloat(prod.precio).toFixed(2)}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function prepararNuevoProducto() {
+            document.getElementById('posProductoId').value = '';
+            document.getElementById('posProductoNombre').value = '';
+            document.getElementById('posProductoPrecio').value = '';
+            document.getElementById('posProductoIcono').value = 'package';
+            document.getElementById('modalPosTitle').innerText = 'Añadir Producto POS';
+            openModal('modalPosProducto');
+        }
+
+        function editarPosProducto(prodId) {
+            const prod = productosPos.find(p => p.id === prodId);
+            if (!prod) return;
+
+            document.getElementById('posProductoId').value = prod.id;
+            document.getElementById('posProductoNombre').value = prod.nombre;
+            document.getElementById('posProductoPrecio').value = prod.precio;
+            document.getElementById('posProductoIcono').value = prod.icono || 'package';
+            document.getElementById('modalPosTitle').innerText = 'Editar Producto POS';
+            openModal('modalPosProducto');
+        }
+
+        function guardarPosProducto(e) {
+            e.preventDefault();
+            const id = document.getElementById('posProductoId').value;
+            const nombre = document.getElementById('posProductoNombre').value;
+            const precio = parseFloat(document.getElementById('posProductoPrecio').value);
+            const icono = document.getElementById('posProductoIcono').value;
+
+            if (id) {
+                const prod = productosPos.find(p => p.id == id);
+                if (prod) {
+                    prod.nombre = nombre;
+                    prod.precio = precio;
+                    prod.icono = icono;
+                }
+            } else {
+                productosPos.push({
+                    id: Date.now(),
+                    nombre,
+                    precio,
+                    icono
+                });
+            }
+
+            guardarStorage();
+            renderPosProductosGrid();
+            closeModal('modalPosProducto');
+        }
+
+        function eliminarPosProducto(prodId) {
+            productosPos = productosPos.filter(p => p.id !== prodId);
+            guardarStorage();
+            renderPosProductosGrid();
+        }
+
         function agregarAlCarrito(nombre, precio) {
             carrito.push({ nombre, precio });
             renderCarrito();
@@ -1146,7 +1264,7 @@
             renderCarrito();
         }
 
-        // POPULATE Y MODALES
+        // POPULATE Y AUXILIARES
         function populateSelects() {
             const selectPlan = document.getElementById('socioPlan');
             selectPlan.innerHTML = '';
@@ -1208,13 +1326,11 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
 
-            // Resaltado Desktop
             document.querySelectorAll('.nav-item').forEach(el => {
                 el.classList.remove('bg-indigo-600/20', 'text-indigo-400', 'border', 'border-indigo-500/30');
                 el.classList.add('text-gray-400');
             });
 
-            // Resaltado Mobile
             document.querySelectorAll('.md\\:hidden button').forEach(el => {
                 el.classList.remove('text-indigo-400');
                 el.classList.add('text-gray-400');
@@ -1240,7 +1356,7 @@
                 planes: 'Gestión de Planes',
                 gastos: 'Control de Gastos',
                 fiados: 'Cuaderno de Fiados',
-                pos: 'Caja / Ventas'
+                pos: 'Caja / Ventas POS'
             };
             document.getElementById('page-title').innerText = titles[tabId];
         }
